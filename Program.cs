@@ -1,9 +1,21 @@
+using HotelSystem.Data;
+using Microsoft.EntityFrameworkCore;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Dodanie serwisów do kontenera
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddDbContext<HotelContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DevConnection")));
+
 var app = builder.Build();
+
+// Inicjalizacja bazy danych
+using var scope = app.Services.CreateScope();
+var context = scope.ServiceProvider.GetRequiredService<HotelContext>();
+DbInitializer.Initialize(context);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
