@@ -1,4 +1,5 @@
 ﻿using HotelSystem.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelSystem.Data
 {
@@ -6,28 +7,64 @@ namespace HotelSystem.Data
     {
         public static void Initialize(HotelContext context)
         {
-            context.Database.EnsureCreated(); // tworzy bazę, jeśli nie istnieje
+            context.Database.Migrate();
 
-            if (context.Rooms.Any()) return; // jeśli już są dane, nic nie robimy
+            // jeśli są pokoje to seed już był
+            if (context.Rooms.Any()) return;
 
-            // Seed danych testowych
-            context.RoomTypes.AddRange(
-                new RoomType { Name = "Single", Beds = 1, PricePerNight = 100 },
-                new RoomType { Name = "Double", Beds = 2, PricePerNight = 150 },
-                new RoomType { Name = "Suite", Beds = 3, PricePerNight = 300 }
-            );
+            // ===== ROOM TYPES =====
+            var single = new RoomType
+            {
+                Name = "Single",
+                Beds = 1,
+                PricePerNight = 100
+            };
 
+            var doubleRoom = new RoomType
+            {
+                Name = "Double",
+                Beds = 2,
+                PricePerNight = 150
+            };
+
+            var suite = new RoomType
+            {
+                Name = "Suite",
+                Beds = 3,
+                PricePerNight = 300
+            };
+
+            context.RoomTypes.AddRange(single, doubleRoom, suite);
+            context.SaveChanges();
+
+            // ===== ROOMS =====
             context.Rooms.AddRange(
-                new Room { Number = "101", RoomTypeId = 1 },
-                new Room { Number = "102", RoomTypeId = 2 },
-                new Room { Number = "201", RoomTypeId = 3 }
+                new Room { Number = "101", RoomTypeId = single.Id },
+                new Room { Number = "102", RoomTypeId = doubleRoom.Id },
+                new Room { Number = "201", RoomTypeId = suite.Id }
             );
 
-            context.Guests.Add(new Guest { Name = "Test Guest", Email = "test@example.com" });
+            // ===== USERS (Guest + Admin) =====
+            context.Users.AddRange(
+                new User
+                {
+                    Username = "admin",
+                    Password = "admin",
+                    Name = "Administrator",
+                    Email = "admin@hotel.local",
+                    IsAdmin = true
+                },
+                new User
+                {
+                    Username = "user",
+                    Password = "user",
+                    Name = "Jan Kowalski",
+                    Email = "user@hotel.local",
+                    IsAdmin = false
+                }
+            );
 
-            context.Users.Add(new User { Username = "admin", Password = "admin", IsAdmin = true });
-
-            context.SaveChanges(); // zapis do bazy
+            context.SaveChanges();
         }
     }
 }

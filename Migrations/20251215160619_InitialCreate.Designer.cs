@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HotelSystem.Migrations
 {
     [DbContext(typeof(HotelContext))]
-    [Migration("20251210214824_InitialCreate")]
+    [Migration("20251215160619_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -24,27 +24,6 @@ namespace HotelSystem.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("HotelSystem.Models.Guest", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Guests");
-                });
-
             modelBuilder.Entity("HotelSystem.Models.Reservation", b =>
                 {
                     b.Property<int>("Id")
@@ -56,20 +35,20 @@ namespace HotelSystem.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("GuestId")
-                        .HasColumnType("int");
-
                     b.Property<int>("RoomId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("GuestId");
-
                     b.HasIndex("RoomId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Reservations");
                 });
@@ -127,8 +106,16 @@ namespace HotelSystem.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsAdmin")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -145,21 +132,21 @@ namespace HotelSystem.Migrations
 
             modelBuilder.Entity("HotelSystem.Models.Reservation", b =>
                 {
-                    b.HasOne("HotelSystem.Models.Guest", "Guest")
-                        .WithMany("Reservations")
-                        .HasForeignKey("GuestId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("HotelSystem.Models.Room", "Room")
                         .WithMany("Reservations")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Guest");
+                    b.HasOne("HotelSystem.Models.User", "User")
+                        .WithMany("Reservations")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Room");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("HotelSystem.Models.Room", b =>
@@ -173,11 +160,6 @@ namespace HotelSystem.Migrations
                     b.Navigation("RoomType");
                 });
 
-            modelBuilder.Entity("HotelSystem.Models.Guest", b =>
-                {
-                    b.Navigation("Reservations");
-                });
-
             modelBuilder.Entity("HotelSystem.Models.Room", b =>
                 {
                     b.Navigation("Reservations");
@@ -186,6 +168,11 @@ namespace HotelSystem.Migrations
             modelBuilder.Entity("HotelSystem.Models.RoomType", b =>
                 {
                     b.Navigation("Rooms");
+                });
+
+            modelBuilder.Entity("HotelSystem.Models.User", b =>
+                {
+                    b.Navigation("Reservations");
                 });
 #pragma warning restore 612, 618
         }
